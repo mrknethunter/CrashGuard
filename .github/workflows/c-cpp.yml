@@ -1,4 +1,4 @@
-name: CrashGuard CI
+name: CrashGuard CI/CD pipeline
 
 on:
   push:
@@ -6,18 +6,21 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  build-and-release:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
 
     - name: Install dependencies
-      run: sudo apt-get update && sudo apt-get install -y build-essential && sudo apt install libcapstone-dev
+      run: sudo apt-get update && sudo apt-get install -y build-essential libcapstone-dev
 
-    - name: Compile main.c
-      run: gcc -Werror main.c -o crashguard -lcapstone
+    - name: Compile Static Binary
+      run: gcc -static -Werror main.c -o crashguard -Wl,-Bstatic -lcapstone -Wl,-Bdynamic
 
     - name: Verify Build Success
       run: |
@@ -27,4 +30,36 @@ jobs:
           echo "Build failed."
           exit 1
         fi
+
+    - name: Check for Release command
+      id: check_release
+      shell: bash
+      run: |
+        COMMIT_MSG="${{ github.event.head_commit.message }}"
+        
+        echo "Commit title: $COMMIT_MSG"
+        
+        # regex: search for strings like 'Release v1.1.1'
+        if [[ "$COMMIT_MSG" =~ Release\ (v[0-9]+\.[0-9]+\.[0-9]+) ]]; then
+            VERSION="${BASH_REMATCH[1]}"
+            echo "Found release command for version $VERSION"
+            
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+            echo "IS_RELEASE=true" >> $GITHUB_ENV
+        else
+            echo "No release command in this commit"
+            echo "IS_RELEASE=false" >> $GITHUB_ENV
+        fi
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      if: env.IS_RELEASE == 'true'
+      with:
+        files: crashguard
+        tag_name: ${{ env.VERSION }}   
+        name: Release ${{ env.VERSION }} 
+        target_commitish: ${{ github.sha }} 
+        draft: false
+        prerelease: false
+
         
