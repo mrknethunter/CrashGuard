@@ -134,7 +134,7 @@ void print_c_context(const char *exe_name, long relative_addr) {
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
-        fprintf(stderr, "Usage: %s <target_executable> [executable_args]\n", argv[0]);
+        fprintf(stderr, "Bad arguments.\nUsage: %s <target_executable> [executable_args]\n", argv[0]);
         return 1;
     }
 
