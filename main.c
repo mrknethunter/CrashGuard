@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
 
                     printf("\n" ANSI_BOLD_RED "=========================================" ANSI_RESET);
                     printf("\n" ANSI_BOLD_RED "--- SEGMENTATION FAULT DETECTED ---" ANSI_RESET);
-                    printf("\n" ANSI_BOLD_RED "--- CRASH ANALYSIS ANALYSIS ---" ANSI_RESET);
+                    printf("\n" ANSI_BOLD_RED "--- CRASH ANALYSIS ---" ANSI_RESET);
                     printf("\n" ANSI_BOLD_RED "=========================================" ANSI_RESET "\n");
 
                     ptrace(PTRACE_GETREGS, child, NULL, &regs);
