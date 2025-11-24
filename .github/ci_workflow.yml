@@ -1,0 +1,31 @@
+name: CrashGuard CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: sudo apt-get update && sudo apt-get install -y build-essential && sudo apt install libcapstone-dev
+
+    - name: Compile main.c
+      run: gcc -Werror main.c -o crashguard
+
+    - name: Verify Build Success
+      run: |
+        if [ -f ./crashguard ]; then
+          echo "Build success."
+        else
+          echo "Build failed."
+          exit 1
+        fi
+
+        
